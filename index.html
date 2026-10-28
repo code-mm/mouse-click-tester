@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="离线可用的鼠标点击测试：检查单击重复、按住中断，比较鼠标和触控板，并导出测试记录。">
+  <title>鼠标点击测试</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='7' y='2' width='18' height='28' rx='9' fill='%231c5273'/%3E%3Cpath d='M16 3v11M8 14h16' stroke='white' stroke-width='2'/%3E%3C/svg%3E">
+  <style>
+    :root{--bg:#f3f5f7;--paper:#fff;--ink:#192f40;--muted:#617382;--line:#dce3e8;--blue:#1c5273;--blue-soft:#eaf3f9;--orange:#a64c0b;--orange-soft:#fff3e6;--green:#236c54;--mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}button,input,select{font:inherit}button{cursor:pointer}button:disabled{cursor:default;opacity:.45}button:focus-visible,input:focus-visible,select:focus-visible,summary:focus-visible{outline:3px solid #75b8e3;outline-offset:3px}button,input,select{border:1px solid var(--line);border-radius:8px}button{background:#fff;color:var(--ink);padding:9px 16px;font-weight:600}button:hover:not(:disabled){background:#edf3f7}.primary{color:white;background:var(--blue);border-color:var(--blue)}.primary:hover:not(:disabled){background:#16435e}.secondary{color:var(--blue)}.small{font-size:14px;padding:6px 10px}input,select{width:100%;padding:8px 10px;color:var(--ink);background:white}input[type=checkbox]{width:auto;accent-color:var(--blue)}input[type=number]{font-variant-numeric:tabular-nums}.shell{max-width:1120px;margin:0 auto;padding:26px 24px 40px}header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}.brand{display:flex;align-items:center;gap:12px}.brand svg{width:31px;height:39px;flex:none}h1{font-size:25px;line-height:1.2;margin:0;font-weight:700;letter-spacing:-.5px}.byline{font-size:14px;color:var(--muted);margin-top:5px}.card{background:var(--paper);border:1px solid var(--line);border-radius:14px}.setup{padding:17px 20px;margin-bottom:16px}.mode-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.modes{display:flex;gap:5px;border-radius:9px;padding:4px;background:#eef2f5}.modes button{border:0;background:transparent;padding:6px 18px;color:var(--muted)}.modes button[aria-pressed=true]{background:white;color:var(--blue);box-shadow:0 1px 3px #172e4020}.mode-note{font-size:14px;color:var(--muted)}.fields{display:grid;grid-template-columns:1.5fr 1fr 1fr .8fr;gap:14px}.field label{font-size:14px;font-weight:600;display:block;margin-bottom:5px}.field small{font-size:12px;color:var(--muted)}.workspace{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(280px,1fr);gap:16px;align-items:stretch}.test-card{padding:18px}.test-top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:13px}.state{font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:7px}.dot{width:8px;height:8px;background:#9babb6;border-radius:50%}.state.running .dot{background:#236c54}.test-top span:last-child{font-size:14px;color:var(--muted)}#pad{position:relative;overflow:hidden;min-height:280px;border-radius:11px;background:var(--blue);color:white;text-align:center;display:flex;align-items:center;justify-content:center;flex-direction:column;user-select:none;-webkit-user-select:none;touch-action:none;cursor:crosshair;padding:22px;box-shadow:inset 0 0 0 1px #ffffff1a}#pad.inactive{background:#3b5669;cursor:default}#pad.pressed{background:#174361}#pad.flash{box-shadow:inset 0 0 0 4px #f0ae6b}#pad .cross{position:absolute;top:16px;left:18px;opacity:.45;font-family:var(--mono);font-size:23px}.pad-big{font-size:64px;font-family:var(--mono);font-weight:600;line-height:1.2;font-variant-numeric:tabular-nums;margin:4px 0}.pad-title{font-size:19px;font-weight:600}.pad-hint{font-size:14px;opacity:.8;margin-top:8px}.hold-bar{width:min(250px,90%);height:6px;background:#ffffff28;border-radius:5px;margin-top:18px;overflow:hidden;display:none}.hold-bar i{display:block;background:#9cd5eb;width:0;height:100%;transition:width .08s linear}.actions{display:flex;align-items:center;gap:10px;margin-top:15px}.actions .elapsed{margin-left:auto;color:var(--muted);font:14px var(--mono)}.instructions{font-size:14px;color:var(--muted);margin:13px 1px 0}.metrics{padding:20px;display:flex;flex-direction:column}.metrics h2,.section-heading h2{font-size:17px;margin:0;font-weight:650}.metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:17px 16px;margin-top:19px}.metric-label{font-size:14px;color:var(--muted)}.metric-value{font:600 31px/1.25 var(--mono);margin-top:4px}.metric-value small{font:14px -apple-system,sans-serif;color:var(--muted)}.metric-value.warn{color:var(--orange)}.metric-value.tiny{font-size:24px}.sub-note{font-size:12px;color:var(--muted);margin-top:4px}.live-info{font-size:14px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;margin-top:auto}.conclusion{padding:17px 20px;margin-top:16px;display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center}.conclusion h2{font-size:17px;margin:0 0 4px}.conclusion p{font-size:14px;color:var(--muted);margin:0}.conclusion.flagged{background:var(--orange-soft);border-color:#e7c8a5}.result-inputs{display:flex;flex-wrap:wrap;align-items:end;gap:14px;margin-top:13px}.actual-field{width:148px}.check{display:flex;align-items:center;gap:7px;font-size:14px;padding-bottom:8px}.exports{display:flex;flex-direction:column;gap:8px;min-width:164px}.section{margin-top:20px}.section-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:12px}.section-heading span{font-size:13px;color:var(--muted)}.table-wrap{overflow-x:auto;max-height:310px;overflow-y:auto}table{border-collapse:collapse;width:100%;font-size:14px;text-align:left}th{background:#f7f9fa;color:var(--muted);font-size:13px;font-weight:600;position:sticky;top:0;z-index:1}td,th{padding:10px 15px;border-bottom:1px solid #e7ecf0;white-space:nowrap}tr:last-child td{border-bottom:0}td.number{font-family:var(--mono);font-variant-numeric:tabular-nums}tr.flag td{background:#fff6ed}.tag{font-size:12px;background:#eaf2f6;color:var(--blue);padding:3px 7px;border-radius:5px}.tag.warn{background:#fde7cb;color:var(--orange)}.tag.neutral{background:#eff1f3;color:var(--muted)}.empty{text-align:center;color:var(--muted);padding:26px;font-size:14px;white-space:normal}.history-list{padding:0 18px}.history-row{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:13px 0;border-bottom:1px solid var(--line)}.history-row:last-child{border:0}.history-row strong{font-size:14px;display:block}.history-row p{font-size:13px;margin:4px 0 0;color:var(--muted)}.history-row button{flex:none}.notice{margin-top:20px;border-top:1px solid var(--line);padding-top:17px;color:var(--muted);font-size:14px}.notice summary{cursor:pointer;color:var(--ink);font-weight:600}.notice p{margin:9px 0;max-width:920px}.storage-message{color:var(--orange);font-size:13px}.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#213d50;color:white;padding:10px 20px;border-radius:8px;font-size:14px;z-index:9;box-shadow:0 5px 25px #16324726}.hidden{display:none!important}footer{font-size:12px;color:var(--muted);margin-top:18px}.only-hold.hidden{display:none}a{color:var(--blue)}
+    @media(max-width:760px){.shell{padding:18px 14px 30px}header{align-items:flex-start}h1{font-size:23px}.byline{max-width:225px}.fields{grid-template-columns:1fr 1fr}.workspace{grid-template-columns:1fr}.metrics-grid{grid-template-columns:repeat(4,1fr);gap:12px}.metrics{padding:17px}.metrics-grid{margin:14px 0}.metric-value{font-size:26px}.metric-value.tiny{font-size:21px}.live-info{margin-top:9px}.conclusion{grid-template-columns:1fr}.exports{flex-direction:row;flex-wrap:wrap}.mode-row{align-items:flex-start}.mode-note{max-width:180px}.pad-big{font-size:55px}#pad{min-height:250px}.history-row{align-items:flex-start}.setup{padding:14px}.test-card{padding:14px}.test-top span:last-child{font-size:12px}}
+    @media(max-width:420px){.metrics-grid{grid-template-columns:1fr 1fr}.mode-note{display:none}.check{font-size:13px}.section-heading span{max-width:145px;text-align:right}header .small{max-width:95px;font-size:12px}.brand{gap:8px}.brand svg{width:24px}.byline{font-size:12px}.history-row button{font-size:12px;padding:6px 8px}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+<main class="shell">
+  <header>
+    <div class="brand"><svg aria-hidden="true" viewBox="0 0 32 40"><rect x="6" y="2" width="20" height="36" rx="10" fill="#1c5273"/><path d="M16 3v15M7 18h18" stroke="white" stroke-width="2"/><rect x="14" y="7" width="4" height="7" rx="2" fill="white"/></svg><div><h1>鼠标点击测试</h1><div class="byline">离线可用 · 测试记录只保存在本机浏览器</div></div></div>
+    <button id="download-page" class="small secondary">保存离线网页</button>
+  </header>
+
+  <section class="card setup" aria-label="测试设置">
+    <div class="mode-row"><div class="modes" aria-label="测试方式"><button id="mode-click" aria-pressed="true">单击测试</button><button id="mode-hold" aria-pressed="false">按住测试</button></div><span class="mode-note" id="mode-note">先测鼠标，再测触控板作对照</span></div>
+    <div class="fields">
+      <div class="field"><label for="device-name">设备备注</label><input id="device-name" placeholder="例如：G102 / Mac 内建触控板" maxlength="80" autocomplete="off"></div>
+      <div class="field"><label for="source">输入设备</label><select id="source"><option value="mouse">鼠标</option><option value="trackpad">触控板</option><option value="other">其他</option></select></div>
+      <div class="field"><label for="button">测试按键</label><select id="button"><option value="0">左键</option><option value="2">右键</option><option value="1">中键 / 滚轮按键</option></select></div>
+      <div class="field"><label id="threshold-label" for="threshold">短间隔阈值（ms）</label><input id="threshold" type="number" min="30" max="500" step="10" value="180"><small id="threshold-help">小于此值，仅标记为线索</small></div>
+    </div>
+  </section>
+
+  <div class="workspace">
+    <section class="card test-card" aria-label="点击区域">
+      <div class="test-top"><span class="state" id="state"><i class="dot" aria-hidden="true"></i><span id="state-text">尚未开始</span></span><span id="pad-meta">只统计蓝色区域内的按下</span></div>
+      <div id="pad" class="inactive" role="region" aria-label="鼠标测试区域"><span class="cross" aria-hidden="true">+</span><div class="pad-title" id="pad-title">点击下方「开始测试」</div><div class="pad-big" id="pad-value">0</div><div class="pad-hint" id="pad-hint">每隔约 1 秒单击，建议手动数 20 次</div><div class="hold-bar" id="hold-bar"><i id="hold-progress"></i></div></div>
+      <div class="actions"><button id="start" class="primary">开始测试</button><button id="stop" disabled>结束测试</button><span class="elapsed" id="elapsed">00:00</span></div>
+      <p class="instructions" id="instructions">不要主动双击。数完后点击「结束测试」，再填写手指实际单击次数。计数不会到 20 自动停止。</p>
+    </section>
+    <section class="card metrics" aria-label="实时统计">
+      <h2>实时统计</h2>
+      <div class="metrics-grid">
+        <div><div class="metric-label">收到按下</div><div class="metric-value" id="count">0 <small>次</small></div><div class="sub-note">只计按下，不把松开再算一次</div></div>
+        <div><div class="metric-label" id="flag-label">短间隔重复</div><div class="metric-value warn" id="rapid">0 <small>次</small></div><div class="sub-note" id="rapid-help">主动双击也会被标记</div></div>
+        <div><div class="metric-label">上次按下间隔</div><div class="metric-value tiny" id="last-gap">—</div><div class="sub-note">两次按下之间的时间</div></div>
+        <div><div class="metric-label">最短按下间隔</div><div class="metric-value tiny" id="min-gap">—</div><div class="sub-note">本组测试的最短值</div></div>
+      </div>
+      <div class="live-info" id="live-info">开始后会显示本次收到的按下和松开记录。鼠标与触控板应分别测试、保存。</div>
+    </section>
+  </div>
+
+  <section class="card conclusion" id="conclusion" aria-label="测试结果">
+    <div><h2 id="result-title">等待测试</h2><p id="result-description" role="status" aria-live="polite">短间隔点击本身不能证明鼠标坏了；请结合实际按键次数和触控板对照判断。</p>
+      <div class="result-inputs"><div class="field actual-field"><label for="actual">手指实际按下次数</label><input id="actual" type="number" min="1" max="10000" placeholder="结束后填写" disabled></div><label class="check"><input id="confirm-single" type="checkbox" disabled><span id="confirm-label">确认每次只单击，未主动双击</span></label></div>
+    </div>
+    <div class="exports"><button id="export-report" class="secondary" disabled>导出文字报告</button><button id="export-json" class="small" disabled>导出事件记录 JSON</button></div>
+  </section>
+
+  <section class="section" aria-label="本次事件">
+    <div class="section-heading"><h2>本次按键记录</h2><span>最新在上 · 显示最近 100 次</span></div>
+    <div class="card table-wrap"><table><thead><tr><th>序号</th><th>按下时间</th><th>按下间隔</th><th>按住时长</th><th>状态</th></tr></thead><tbody id="events"><tr><td colspan="5" class="empty">开始测试后，在蓝色区域单击或按住。</td></tr></tbody></table></div>
+  </section>
+
+  <section class="section" aria-label="测试历史">
+    <div class="section-heading"><h2>已保存测试</h2><button id="clear-history" class="small" disabled>清除历史</button></div>
+    <div class="card history-list" id="history"><div class="empty">每组测试结束后自动保存，最多保留最近 12 组。</div></div>
+    <p id="storage-message" class="storage-message hidden"></p>
+  </section>
+
+  <details class="notice"><summary>如何看结果，以及网页能检测到什么</summary><p><strong>单击测试：</strong>手指每隔约 1 秒单击一次，并手动计数。主动双击或点击太快也会出现短间隔标记。如果你确认只单击，但收到的次数更多，说明浏览器收到了额外点击。</p><p><strong>按住测试：</strong>每次按住 3 秒再松开，重复 5 次。「未达目标」也可能是主动提前松开，不会直接判定为硬件故障。如果手指一直按着，却出现松开、再按下记录，则值得进一步排查。</p><p><strong>对照方法：</strong>用相同方式分别测试鼠标和触控板；再换 USB 端口、避开扩展坞，或换另一台电脑复测。对照正常、只有同一只鼠标反复异常时，更应怀疑鼠标自身。</p><p><strong>能力边界：</strong>网页只能记录浏览器接收到的鼠标事件，无法读取 USB/HID 原始数据，也不能自动识别鼠标型号或区分鼠标和触控板。结果提供线索，不能单独排除驱动、系统或固件问题。</p><p><strong>记录范围：</strong>只记录你开始测试后的测试区域按键事件，不采集其他页面、键盘内容或屏幕。测试数据不上传；浏览器清除网站数据后，历史会消失。离线版与在线版的浏览器历史可能分别保存，重要记录请导出。</p></details>
+  <footer>测试过程中，移出区域后松开仍会记录；切换窗口或页面会中止本次按住，标记为「记录中断」，避免误判。</footer>
+</main>
+<div id="toast" class="toast hidden" role="status"></div>
+<script>
+(() => {
+  'use strict';
+  // Capture the clean, self-contained document before displaying any user records.
+  const offlineHTML = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  const $ = id => document.getElementById(id);
+  const storageKey = 'mouse-click-tester-history-v1';
+  const sourceLabels = {mouse:'鼠标', trackpad:'触控板', other:'其他'};
+  const buttonLabels = {0:'左键', 1:'中键 / 滚轮按键', 2:'右键'};
+  const version = '1.0.0';
+  let mode = 'click', session = null, running = false, pending = null, history = [], storageOK = true, timer = null, flashTimer = null, toastTimer = null;
+
+  function toast(message) { $('toast').textContent = message; $('toast').classList.remove('hidden'); clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').classList.add('hidden'), 2400); }
+  function number(value, fallback, min, max) { const n = Number(value); return Number.isFinite(n) && n >= min && n <= max ? n : fallback; }
+  function timeString(ms) { return ms === null || ms === undefined ? '—' : Math.round(ms) + ' ms'; }
+  function clock(date) { return new Date(date).toLocaleTimeString('zh-CN', {hour12:false, hour:'2-digit', minute:'2-digit', second:'2-digit'}) + '.' + String(new Date(date).getMilliseconds()).padStart(3,'0'); }
+  function currentNow() { return performance.now(); }
+  function getStats(data = session) {
+    const presses = data?.presses || [];
+    const gaps = presses.filter(p => p.gapMs !== null).map(p => p.gapMs);
+    return {count:presses.length, rapid:presses.filter(p => p.rapid).length, incomplete:presses.filter(p => p.interrupted || p.upMs === null).length,
+      shortHold:presses.filter(p => p.upMs !== null && !p.interrupted && p.holdMs < data.holdTargetMs).length,
+      lastGap:gaps.length ? gaps[gaps.length-1] : null, minGap:gaps.length ? Math.min(...gaps) : null};
+  }
+  function contextData() {
+    return {mode, source:$('source').value, deviceName:$('device-name').value.trim() || sourceLabels[$('source').value], button:Number($('button').value),
+      thresholdMs:number($('threshold').value,180,30,500), holdTargetMs:3000, actualCount:null, confirmedSingle:false};
+  }
+  function configure() {
+    $('mode-click').setAttribute('aria-pressed', String(mode==='click'));
+    $('mode-hold').setAttribute('aria-pressed', String(mode==='hold'));
+    $('flag-label').textContent = mode==='hold' ? '未达按住目标' : '短间隔重复';
+    $('rapid-help').textContent = mode==='hold' ? '主动提前松开也会计入' : '主动双击也会被标记';
+    $('instructions').textContent = mode==='hold' ? '在蓝色区域按住 3 秒再松开，重复 5 次。不要切换窗口；测试完成后点击「结束测试」。' : '不要主动双击。数完后点击「结束测试」，再填写手指实际单击次数。计数不会到 20 自动停止。';
+    $('confirm-label').textContent = mode==='hold' ? '确认每次都尝试持续按住 3 秒' : '确认每次只单击，未主动双击';
+    $('mode-note').textContent = mode==='hold' ? '检查持续按住时是否意外松开' : '先测鼠标，再测触控板作对照';
+    $('pad-hint').textContent = mode==='hold' ? '每次按住 3 秒，建议重复 5 次' : '每隔约 1 秒单击，建议手动数 20 次';
+    $('hold-bar').style.display = mode==='hold' ? 'block' : 'none';
+    $('pad-title').textContent = running ? (mode==='hold' ? '按住 3 秒，再松开' : '在这里慢慢单击') : session ? '本组测试已结束' : '点击下方「开始测试」';
+  }
+  function start() {
+    if (running) return;
+    const cfg = contextData();
+    $('threshold').value = cfg.thresholdMs;
+    session = {schemaVersion:1, appVersion:version, id:globalThis.crypto?.randomUUID?.() || 'test-'+Date.now()+'-'+Math.random().toString(16).slice(2),
+      startedAt:new Date().toISOString(), endedAt:null, startPerformanceMs:currentNow(), ...cfg, presses:[], rawEvents:[], browser:navigator.userAgent, notes:[]};
+    pending = null; running = true;
+    $('actual').value = ''; $('confirm-single').checked = false;
+    ['source','button','device-name','threshold','mode-click','mode-hold'].forEach(id => $(id).disabled = true);
+    $('start').disabled = true; $('stop').disabled = false;
+    $('actual').disabled = true; $('confirm-single').disabled = true;
+    $('export-report').disabled = true; $('export-json').disabled = true;
+    $('state').classList.add('running'); $('state-text').textContent = '正在测试';
+    $('pad').classList.remove('inactive'); $('hold-progress').style.width = '0%';
+    configure(); render(); clearInterval(timer); timer = setInterval(tick,80); tick();
+  }
+  function finish() {
+    if (!running || !session) return;
+    interrupt('结束测试时仍处于按下状态');
+    running = false; session.endedAt = new Date().toISOString(); clearInterval(timer); timer = null;
+    ['source','button','device-name','threshold','mode-click','mode-hold'].forEach(id => $(id).disabled = false);
+    $('start').disabled = false; $('start').textContent = '开始新一组'; $('stop').disabled = true;
+    $('actual').disabled = false; $('confirm-single').disabled = false;
+    $('export-report').disabled = !session.presses.length; $('export-json').disabled = !session.presses.length;
+    $('pad').classList.add('inactive'); $('pad').classList.remove('pressed'); $('state').classList.remove('running'); $('state-text').textContent = '本组已结束';
+    if (session.presses.length) saveSession(); configure(); render(); tick();
+  }
+  function addRaw(event, kind, extra = {}) {
+    if (!session || !running) return;
+    session.rawEvents.push({type:kind, button:event?.button ?? session.button, buttons:event?.buttons ?? null,
+      pointerType:event?.pointerType ?? null, trusted:event?.isTrusted ?? null, elapsedMs:currentNow()-session.startPerformanceMs,
+      wallTime:new Date().toISOString(), ...extra});
+  }
+  function down(event) {
+    if (!running || !session) return;
+    if (event.pointerType !== 'mouse') { toast('请使用鼠标或触控板；触摸屏和手写笔不计入本测试'); return; }
+    if (event.button !== session.button) return;
+    event.preventDefault();
+    const now = currentNow();
+    if (pending) interrupt('尚未记录松开时又收到按下');
+    const previous = session.presses.at(-1);
+    const elapsed = now-session.startPerformanceMs;
+    const gap = previous ? elapsed-previous.downMs : null;
+    const press = {number:session.presses.length+1, downMs:elapsed, downWallTime:new Date().toISOString(), upMs:null, holdMs:null, gapMs:gap,
+      releaseGapMs:previous && previous.upMs !== null ? elapsed-previous.upMs : null, rapid:gap!==null && gap<session.thresholdMs,
+      interrupted:false, pointerId:event.pointerId, trusted:event.isTrusted};
+    session.presses.push(press); pending = press;
+    addRaw(event,'pointerdown');
+    try { $('pad').setPointerCapture(event.pointerId); } catch (_) {}
+    $('pad').classList.add('pressed');
+    if (press.rapid) { $('pad').classList.add('flash'); clearTimeout(flashTimer); flashTimer = setTimeout(() => $('pad').classList.remove('flash'),250); }
+    render(); tick();
+  }
+  function up(event) {
+    if (!running || !session || !pending || event.pointerId !== pending.pointerId || event.button !== session.button) return;
+    event.preventDefault();
+    const elapsed = currentNow()-session.startPerformanceMs;
+    pending.upMs = elapsed; pending.holdMs = elapsed-pending.downMs;
+    addRaw(event,'pointerup'); pending = null; $('pad').classList.remove('pressed'); render(); tick();
+  }
+  function interrupt(reason) {
+    if (!running || !session || !pending) return;
+    pending.interrupted = true; pending.interruptionReason = reason;
+    addRaw(null,'interrupted',{reason}); pending = null;
+    $('pad').classList.remove('pressed'); render();
+  }
+  function tick() {
+    if (!session) return;
+    const duration = running ? currentNow()-session.startPerformanceMs : new Date(session.endedAt)-new Date(session.startedAt);
+    const seconds = Math.max(0,Math.floor(duration/1000)); $('elapsed').textContent = String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
+    if (session.mode==='hold') {
+      const held = pending ? Math.max(0,currentNow()-session.startPerformanceMs-pending.downMs) : 0;
+      $('hold-progress').style.width = Math.min(100,held/session.holdTargetMs*100)+'%';
+      $('pad-value').textContent = pending ? (held/1000).toFixed(1)+'s' : String(session.presses.length);
+      $('pad-title').textContent = pending ? held>=session.holdTargetMs ? '已满 3 秒，可以松开' : '继续按住…' : running ? '按住 3 秒，再松开' : '本组测试已结束';
+    }
+  }
+  function result(data = session) {
+    if (!data || !data.presses.length) return {title:running?'等待区域内的按键':'等待测试', detail:'短间隔点击本身不能证明鼠标坏了；请结合实际按键次数和触控板对照判断。', flagged:false};
+    const s = getStats(data), actual = data.actualCount, extra = actual === null ? null : s.count-actual;
+    if (data.mode==='hold') {
+      const incomplete = s.incomplete ? '另有 '+s.incomplete+' 次记录中断或未松开，不参与按住时长判断。' : '';
+      return {title:running?'按住测试进行中':s.shortHold?'有 '+s.shortHold+' 次未达到 3 秒':'已记录 '+s.count+' 次按住',
+        detail:'收到 '+s.count+' 次按下，'+s.shortHold+' 次有效松开早于 3 秒。'+(data.confirmedSingle && s.shortHold ? '若手指一直按住却发生松开，请换设备或电脑对照复测。' : '主动提前松开也会出现此结果。')+incomplete, flagged:!!s.shortHold};
+    }
+    let title = running ? '单击测试进行中' : s.rapid ? '记录到 '+s.rapid+' 次短间隔重复' : '本次未发现短间隔重复';
+    let detail = '收到 '+s.count+' 次按下，'+s.rapid+' 次间隔小于 '+data.thresholdMs+' ms。';
+    if (actual !== null) {
+      detail += '你填写实际按下 '+actual+' 次，'+(extra>0?'多收到 '+extra+' 次。':extra<0?'少收到 '+Math.abs(extra)+' 次。':'次数一致。');
+      if (extra>0 && data.confirmedSingle) title='确认单击后，多收到 '+extra+' 次按下';
+    }
+    detail += data.confirmedSingle && (s.rapid || extra>0) ? '这是额外输入的线索；请用触控板或另一台电脑对照，网页无法单独确定硬件原因。' : '请确认是否主动双击，并填写手指实际按下次数。';
+    if (s.incomplete) detail+='有 '+s.incomplete+' 次未完整松开或记录中断。';
+    return {title,detail,flagged:!!s.rapid || extra>0};
+  }
+  function render() {
+    const s = getStats();
+    $('count').replaceChildren(document.createTextNode(s.count+' '),unit('次'));
+    $('rapid').replaceChildren(document.createTextNode((session?.mode==='hold'?s.shortHold:s.rapid)+' '),unit('次'));
+    $('last-gap').textContent = timeString(s.lastGap); $('min-gap').textContent = timeString(s.minGap);
+    if (!pending || session?.mode!=='hold') $('pad-value').textContent = String(s.count);
+    $('live-info').textContent = session ? session.deviceName+' · '+buttonLabels[session.button]+' · '+(session.mode==='hold'?'按住目标 3 秒':'短间隔阈值 '+session.thresholdMs+' ms')+(s.incomplete?' · 未完整松开 / 中断 '+s.incomplete+' 次':'') : '开始后会显示本次收到的按下和松开记录。鼠标与触控板应分别测试、保存。';
+    const r = result(); $('result-title').textContent = r.title; $('result-description').textContent = r.detail; $('conclusion').classList.toggle('flagged',r.flagged);
+    renderEvents();
+  }
+  function unit(text) { const small=document.createElement('small');small.textContent=text;return small; }
+  function renderEvents() {
+    const body=$('events'); body.replaceChildren();
+    if (!session?.presses.length) { const tr=document.createElement('tr'),td=document.createElement('td');td.colSpan=5;td.className='empty';td.textContent='开始测试后，在蓝色区域单击或按住。';tr.append(td);body.append(tr);return; }
+    session.presses.slice(-100).reverse().forEach(p => {
+      const tr=document.createElement('tr');
+      let label=p.interrupted?'记录中断':p.upMs===null?'仍在按住':session.mode==='hold'?(p.holdMs<session.holdTargetMs?'未达 3 秒':'达到目标'):(p.rapid?'短间隔重复':'单次记录');
+      const flagged=!p.interrupted && (p.rapid || session.mode==='hold' && p.upMs!==null && p.holdMs<session.holdTargetMs);
+      if (flagged) tr.className='flag';
+      [String(p.number),clock(p.downWallTime),timeString(p.gapMs),p.interrupted?'未完整记录':timeString(p.holdMs)].forEach((value,i) => {const td=document.createElement('td');td.className='number';td.textContent=value;tr.append(td);});
+      const td=document.createElement('td'),tag=document.createElement('span');tag.className='tag'+(p.interrupted?' neutral':flagged?' warn':'');tag.textContent=label;td.append(tag);tr.append(td);body.append(tr);
+    });
+  }
+  function snapshot(data) { const copy=JSON.parse(JSON.stringify(data));delete copy.startPerformanceMs;return copy; }
+  function persist() {
+    try {localStorage.setItem(storageKey,JSON.stringify(history));storageOK=true;}
+    catch (_) {storageOK=false;$('storage-message').textContent='浏览器无法保存历史；当前记录仍可导出，建议下载文字报告或 JSON。';$('storage-message').classList.remove('hidden');}
+    renderHistory();
+  }
+  function saveSession() { if (!session || !session.endedAt || !session.presses.length) return; const copy=snapshot(session);history=[copy,...history.filter(x=>x.id!==copy.id)].slice(0,12);persist(); }
+  function validHistory(data) { return data && data.schemaVersion===1 && typeof data.id==='string' && ['click','hold'].includes(data.mode) && typeof data.deviceName==='string' && Array.isArray(data.presses) && data.presses.every(p=>p && typeof p.downMs==='number' && typeof p.number==='number' && (p.gapMs===null || typeof p.gapMs==='number')) && typeof data.thresholdMs==='number' && typeof data.holdTargetMs==='number'; }
+  function renderHistory() {
+    const list=$('history');list.replaceChildren();$('clear-history').disabled=!history.length;
+    if (!history.length) {const empty=document.createElement('div');empty.className='empty';empty.textContent='每组测试结束后自动保存，最多保留最近 12 组。';list.append(empty);return;}
+    history.forEach(data => {const s=getStats(data),row=document.createElement('div');row.className='history-row';const text=document.createElement('div'),name=document.createElement('strong'),detail=document.createElement('p');
+      name.textContent=data.deviceName+' · '+(data.mode==='hold'?'按住测试':'单击测试')+' · '+buttonLabels[data.button];
+      detail.textContent=new Date(data.startedAt).toLocaleString('zh-CN',{hour12:false})+' · 收到 '+s.count+' 次 · '+(data.mode==='hold'?'未达目标 '+s.shortHold:'短间隔 '+s.rapid)+' 次'+(data.actualCount!==null?' · 手指实际 '+data.actualCount+' 次':'');
+      text.append(name,detail);const button=document.createElement('button');button.className='small';button.textContent='导出报告';button.addEventListener('click',()=>exportReport(data));row.append(text,button);list.append(row);
+    });
+  }
+  function updateConfirmation() {
+    if (!session || running) return;
+    const raw=$('actual').value.trim();session.actualCount=raw==='' || !Number.isInteger(Number(raw))?null:number(raw,null,1,10000);session.confirmedSingle=$('confirm-single').checked;
+    if (raw!=='' && session.actualCount===null) $('actual').setCustomValidity('请输入 1 到 10000 之间的整数次数');else $('actual').setCustomValidity('');
+    render();saveSession();
+  }
+  function download(text,filename,type) {const blob=new Blob([text],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),10000);}
+  function filename(data,ext) {return '鼠标测试-'+new Date(data.startedAt).toISOString().replace(/[:.]/g,'-')+'.'+ext;}
+  function exportReport(data=session) {
+    if (!data?.presses.length) return;
+    const s=getStats(data),r=result(data);
+    const lines=['鼠标点击测试报告','版本：'+version,'测试开始：'+new Date(data.startedAt).toLocaleString('zh-CN',{hour12:false}),'测试结束：'+(data.endedAt?new Date(data.endedAt).toLocaleString('zh-CN',{hour12:false}):'未结束'),
+      '设备备注：'+data.deviceName,'输入设备（用户选择）：'+sourceLabels[data.source],'测试按键：'+buttonLabels[data.button],'测试方式：'+(data.mode==='hold'?'按住测试':'单击测试'),
+      '短间隔阈值：'+data.thresholdMs+' ms','按住目标：'+data.holdTargetMs+' ms','收到按下：'+s.count+' 次','短间隔重复：'+s.rapid+' 次','未达按住目标：'+(data.mode==='hold'?s.shortHold+' 次':'不适用'),'记录中断 / 未完整松开：'+s.incomplete+' 次',
+      '手指实际按下次数（用户填写）：'+(data.actualCount??'未填写'),'用户确认：'+(data.confirmedSingle?(data.mode==='hold'?'每次尝试持续按住 3 秒':'每次只单击，未主动双击'):'未确认'),'最短按下间隔：'+timeString(s.minGap),'',r.title,r.detail,'',
+      '说明：网页仅记录浏览器收到的事件，不能读取 USB/HID 原始输入，也不能单独确定硬件故障。正常双击也会产生短间隔标记。','', '序号\t按下时间\t按下间隔(ms)\t按住时长(ms)\t短间隔\t记录中断'];
+    data.presses.forEach(p=>lines.push([p.number,clock(p.downWallTime),p.gapMs===null?'—':p.gapMs.toFixed(2),p.holdMs===null?'—':p.holdMs.toFixed(2),p.rapid?'是':'否',p.interrupted?(p.interruptionReason||'是'):'否'].join('\t')));
+    download('\uFEFF'+lines.join('\n'),filename(data,'txt'),'text/plain;charset=utf-8');toast('已导出文字报告');
+  }
+  $('start').addEventListener('click',start);$('stop').addEventListener('click',finish);
+  ['click','hold'].forEach(name=>$('mode-'+name).addEventListener('click',()=>{if(running)return;mode=name;session=null;pending=null;$('actual').value='';$('confirm-single').checked=false;$('actual').disabled=true;$('confirm-single').disabled=true;$('export-report').disabled=true;$('export-json').disabled=true;$('elapsed').textContent='00:00';$('state-text').textContent='尚未开始';configure();render();}));
+  $('pad').addEventListener('pointerdown',down);
+  window.addEventListener('pointerup',up,true);
+  $('pad').addEventListener('pointercancel',event=>{if(pending?.pointerId===event.pointerId)interrupt('浏览器取消了指针事件');});
+  $('pad').addEventListener('lostpointercapture',event=>{if(pending?.pointerId===event.pointerId)interrupt('失去指针捕获，按住记录不完整');});
+  $('pad').addEventListener('contextmenu',event=>event.preventDefault());
+  $('pad').addEventListener('auxclick',event=>event.preventDefault());
+  $('pad').addEventListener('dblclick',event=>{if(running && session && event.button===session.button)addRaw(event,'dblclick');});
+  window.addEventListener('blur',()=>interrupt('切换窗口'));document.addEventListener('visibilitychange',()=>{if(document.hidden)interrupt('页面转入后台');});
+  window.addEventListener('beforeunload',event=>{if(running && session?.presses.length){event.preventDefault();event.returnValue='';}});
+  $('actual').addEventListener('input',updateConfirmation);$('confirm-single').addEventListener('change',updateConfirmation);
+  $('export-report').addEventListener('click',()=>exportReport());
+  $('export-json').addEventListener('click',()=>{if(!session?.presses.length)return;const data=snapshot(session);data.stats=getStats(session);data.result=result(session);download(JSON.stringify(data,null,2),filename(session,'json'),'application/json;charset=utf-8');toast('已导出事件记录');});
+  $('download-page').addEventListener('click',()=>{download(offlineHTML,'鼠标点击测试.html','text/html;charset=utf-8');toast('已保存离线网页，双击文件即可打开');});
+  $('clear-history').addEventListener('click',()=>{if(history.length && confirm('清除本机浏览器中保存的 '+history.length+' 组测试记录？已导出的文件不会删除。')){history=[];persist();toast('历史已清除');}});
+  try {const stored=JSON.parse(localStorage.getItem(storageKey)||'[]');history=Array.isArray(stored)?stored.filter(validHistory).slice(0,12):[];} catch (_) {storageOK=false;$('storage-message').textContent='浏览器无法读取历史；仍可正常测试和导出。';$('storage-message').classList.remove('hidden');}
+  configure();render();renderHistory();
+
+  const registry=document.modelContext;
+  if (registry?.registerTool) {
+    const lifecycle=new AbortController();
+    const spec={name:'read_mouse_test_results',title:'读取鼠标测试结果',description:'读取当前鼠标测试的计数、状态和用户确认信息，以及已保存测试的统计摘要。只读取浏览器事件，不能判断鼠标硬件是否损坏。',
+      inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true,untrustedContentHint:true},
+      execute(input){if(!input || typeof input!=='object' || Array.isArray(input) || Object.keys(input).length)throw new Error('输入必须是空对象。');return {running,current:session?{id:session.id,mode:session.mode,deviceName:session.deviceName,actualCount:session.actualCount,confirmedSingle:session.confirmedSingle,stats:getStats(),result:result()}:null,history:history.map(data=>({id:data.id,deviceName:data.deviceName,mode:data.mode,stats:getStats(data)}))};}};
+    try {Promise.resolve(registry.registerTool(spec,{signal:lifecycle.signal})).catch(()=>{});} catch (_) {}
+    window.addEventListener('pagehide',()=>lifecycle.abort(),{once:true});
+  }
+})();
+</script>
+</body>
+</html>

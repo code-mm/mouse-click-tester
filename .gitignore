@@ -1,0 +1,8 @@
+check-script.cjs
+qa-*.png
+qa-report.txt
+qa-events.json
+offline-qa.html
+verification.json
+.sites-runtime/
+
